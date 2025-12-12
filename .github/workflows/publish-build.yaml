@@ -30,3 +30,19 @@ jobs:
       - name: Publish image
         run: docker push ${{ env.DOCKER_REGISTRY }}:latest
 
+  deploy:
+    runs-on: ubuntu-24.04
+    needs: build
+    steps:
+      - name: Ec2 Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker container stop site-devopsdays || true
+            docker container rm site-devopsdays || true
+            docker login ghrc.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker pull ${{ env.DOCKER_REGISTRY }}:latest
+            docker run -d --name site-devopsdays -p 80:80 ${{ env.DOCKER_REGISTRY }}:latest
