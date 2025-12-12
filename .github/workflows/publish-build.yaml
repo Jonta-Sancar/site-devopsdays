@@ -45,4 +45,4 @@ jobs:
             docker container rm site-devopsdays || true
             docker login ghrc.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
             docker pull ${{ env.DOCKER_REGISTRY }}:latest
-            docker run -d --name site-devopsdays -p 80:80 ${{ env.DOCKER_REGISTRY }}:latest
+            docker run --restart unless-stopped -d --name site-devopsdays -p 80:80 ${{ env.DOCKER_REGISTRY }}:latest
